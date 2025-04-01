@@ -1,0 +1,21 @@
+Ata Segunda Reunião Trabalho Final. 27 de março de 2025 - Engenharia de Software:
+
+Participantes:
+
+- Francisco Garcia Ferreira #00330309
+
+- Norberto Schossler de Nardin Teixeira #00324730
+
+- Nicolas Hibi Martins #00341931
+
+- Estevan Zanetti Küster #00334328
+
+Definições:
+
+- Analisamos novamente, em grupo as especificações do trabalho.
+
+- Definimos a escolha o tema como Troca de Materiais Universitários.
+
+- Planejamos perguntar para a professora na aula de terça-feira (1° de abril) sobre a aceitação do tema.
+
+- Vamos criar um projeto no GitHub para o trabalho após a conferência junto à professora na terça!

@@ -1,0 +1,19 @@
+Ata Primeira Reunião Trabalho Final. 17 de março de 2025 - Engenharia de Software:
+
+Participantes:
+
+- Francisco Garcia Ferreira #00330309
+
+- Norberto Schossler de Nardin Teixeira #00324730
+
+Definições:
+
+- Analisamos cuidadosamente as especificações do trabalho.
+
+- Discutimos possíveis ideias (Leilão, Sistema Bancário, Controle de Presença, Empréstimo de Ferramentas entre Vizinhos e  Troca de Materiais Universitários).
+
+- Reduzimos a duas opções: Empréstimo de Ferramentas entre Vizinhos ou Troca de Materiais Universitários.
+
+- Decidimos esperar os dois novos membros do grupo para participarem da escolha.
+
+

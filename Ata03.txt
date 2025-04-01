@@ -1,0 +1,38 @@
+
+Ata Terceira Reunião Trabalho Final. 01 de abril de 2025, 13:30 - Engenharia de Software:
+
+Participantes:
+
+- Nicolas Hibi Martins #00341931
+
+- Estevan Zanetti Küster #00334328
+
+Definições:
+
+- Conversamos com a professora a respeito da validade de nossa idéia, ela considerou a idéia válida, dizendo não haver a necessidade de gerar lucro para existência de um negócio.
+
+- Foi criado um repositório no github para manter controle do trabalho. Planeja-se incluir as atas no repositório.
+
+- Decidimos pela forma como o sistema irá funcionar. Usuários poderão especificar livros que estão disponibilizando para a troca, bem como aqueles que possuem interesse, e também poderão criar ofertas de trocas entre livros seus e outros livros que estão disponíveis para a troca.
+
+- Como forma secundária de pesquisa, o usuário poderá realizar uma busca direta, usando uma barra de pesquisa, pelo nome do livro, nome do autor do livro e nome de um usuário da plataforma.
+
+- Usuários poderão filtrar livros disponíveis por curso e semestre do curso.
+
+- Usuários poderão especificar em quais campus estes desejam realizar as trocas (o aplicativo só poderá ser usado por estudantes da UFRGS).
+
+- O sistema permite que usuários avaliem uns aos outros após a realização de uma troca.
+
+- Ficamos por definir se o valor para a venda de livros será fixo ou se o usuários poderão escolher um valor por o qual ofertará o livro.
+
+- Sistema de trocas "Estilo Tinder"
+
+O que resta fazer:
+
+- Formalizar na forma esperada pelo relatório aquilo que foi definido até o momento.
+
+- Feita a formalização, criar o diagrama de casos de uso.
+
+- Construir o relatório.
+
+
