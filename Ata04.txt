@@ -1,0 +1,38 @@
+Ata Quarta Reunião Trabalho Final. 02 de abril de 2025, 20:15 - Engenharia de Software:
+
+Participantes:
+
+- Francisco Garcia Ferreira #00330309
+
+- Norberto Schossler de Nardin Teixeira #00324730
+
+- Nicolas Hibi Martins #00341931
+
+- Estevan Zanetti Küster #00334328
+
+Definições:
+
+- Realizamos o preenchimento do relatório da etapa 1, excluindo a parte do diagrama de casos de uso.
+
+- Discutimos três opções de nomes para o negócio: "Tinder Book", "Vira a Página", "Book Match?".
+
+- A estrutura da comunidade foi organizada da seguinte forma:
+	
+	* Dois tipos de moderadores: Um responsável pela validação da criação de usuários. Outro responsável pela validação das transações.
+	
+	* Os universitários, realizando trocas entre si.
+
+- Os livros deverão apresentar as seguinte características: Título, Autor e Condição(foto).
+
+- Os usuários poderão filtrar os livros por Título, Autor, e Campus do dono do livro.
+
+- Confirmado sistema de trocas "Estilo Tinder"
+
+- Foram definidos dois tipos de relatórios:
+
+	* Relatório do usuário: Lista de trocas realizadas. Contatos para futuras trocas.
+
+	* Relatório do sistema: Histórico de trocas. Dados sobre usuários envolvidos. Data das transações.
+
+- Como funcionalidade extra, ficou definida a implementação de um sistema de avaliação dos usuários.
+
