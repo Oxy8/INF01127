@@ -1,0 +1,20 @@
+Ata Quinta Reunião Trabalho Final. 08 de abril de 2025, 19:20 - Engenharia de Software:
+
+Participantes:
+
+- Nicolas Hibi Martins #00341931
+
+- Estevan Zanetti Küster #00334328
+
+Definições:
+
+- Decisão final pelo nome "Vira a página"
+
+- Decisão final pela estruturação dos moderadores como Moderador Simples e Moderador de Usuários.
+
+- Decisão final de quais caso de uso serão incluídos no diagrama, e quais terão descrição essencial ou prelimininar
+
+- Finalização do Diagram de casos de uso
+
+- Finalização do relatório (excluindo)
+
