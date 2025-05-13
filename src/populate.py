@@ -4,14 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Determine the socket path
-socket_path = os.path.join("/home/estevan/Ambientes/tf_engenharia_de_software/pgsocket")
-
-# Construct the connection string
-DATABASE_URL = f"postgresql://@/test_db?host=/home/estevan/Ambientes/tf_engenharia_de_software/pgsocket"
+PGSOCKET = os.environ.get("PGSOCKET")
 
 def create_and_populate():
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(PGSOCKET)
     cur = conn.cursor()
 
     # Create table

@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = f"postgresql://@/test_db?host=/home/estevan/Ambientes/tf_engenharia_de_software/pgsocket"
+PGSOCKET = os.environ.get("PGSOCKET")
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_DATABASE_URI"] = PGSOCKET
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
