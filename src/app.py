@@ -1,14 +1,13 @@
 import os
 from flask import Flask, jsonify, render_template_string, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv
 
-load_dotenv()
+PGSOCKET_URI = os.environ.get("PGSOCKET_URI")
 
-PGSOCKET = os.environ.get("PGSOCKET")
+print(f"\n\nPGSOCKET_URI: {PGSOCKET_URI}\n\n")
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = PGSOCKET
+app.config["SQLALCHEMY_DATABASE_URI"] = PGSOCKET_URI
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
