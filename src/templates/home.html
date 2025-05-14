@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User List</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body>
+    <div x-data="{
+            users: [],
+            newName: '',
+            newEmail: '',
+            newCelular: '',
+            newLocalizacao: '',
+            removeId: '',
+            fetchUsers() {
+                fetch('/users').then(res => res.json()).then(data => this.users = data);
+            },
+            addUser() {
+                fetch('/add_user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: this.newName,
+                        email: this.newEmail,
+                        celular: this.newCelular,
+                        localizacao: this.newLocalizacao
+                    })
+                }).then(() => {
+                    // Clear the input fields
+                    this.newName = '';
+                    this.newEmail = '';
+                    this.newCelular = '';
+                    this.newLocalizacao = '';
+                    this.fetchUsers();
+                });
+            },
+            removeUser() {
+                fetch('/remove_user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ remove_id: this.removeId })
+                }).then(() => {
+                    this.removeId = '';
+                    this.fetchUsers();
+                });
+            }
+        }" x-init="fetchUsers">
+
+        <h2>Add New User</h2>
+        
+        <label for="name">Name:</label>
+        <input type="text" x-model="newName" placeholder="Enter name" required>
+        <br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" x-model="newEmail" placeholder="Enter email" required>
+        <br><br>
+
+        <label for="celular">Celular:</label>
+        <input type="text" x-model="newCelular" placeholder="Enter celular" required>
+        <br><br>
+
+        <label for="localizacao">Localizacao:</label>
+        <input type="text" x-model="newLocalizacao" placeholder="Enter localizacao" required>
+        <br><br>
+
+        <button @click="addUser">Add User</button>
+        <br><br>
+
+        <h1>Users</h1>
+        <ul>
+            <template x-for="user in users" :key="user.id">
+                <li x-text="user.id + ' - ' + user.name"></li>
+            </template>
+        </ul>
+
+        <h2>Remove User</h2>
+        
+        <label for="removeId">Enter ID to remove:</label>
+        <input type="number" x-model="removeId" placeholder="Enter ID to remove" required>
+        <button @click="removeUser">Remove User</button>
+    </div>
+</body>
+</html>
