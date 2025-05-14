@@ -1,19 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User List</title>
+    <title>User and Plant List</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .app {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .main-content {
+            width: 50vw;
+            flex-flow: row nowrap;
+            order: 1;
+        }
+        .sidebar {
+            background-color: #f8f9fa; /* Light background */
+            border-left: 2px solid #dee2e6; /* Stronger border */
+            height: 100vh; /* Full height */
+            width: 45vw;
+            top: 0;
+            overflow-y: auto; /* Scroll if content overflows */
+        }
+    </style>
 </head>
 <body>
-    <div x-data="{
+    <div class="app" x-data="{
             users: [],
+            plants: [],
+            searchQuery: '',
             newName: '',
             newEmail: '',
             newCelular: '',
             newLocalizacao: '',
-            removeId: '',
+            removeUserId: '',
+            newNomePopular: '',
+            newNomeEspecie: '',
+            newFamilia: '',
+            newGenero: '',
+            newTamanho: '',
+            newLocalizacaoPlant: '',
+            newStatusTroca: '',
+            newUsuarioId: '',
+            newFotoUrl: '',
+            removePlantId: '',
+            
             fetchUsers() {
                 fetch('/users').then(res => res.json()).then(data => this.users = data);
+            },
+            fetchPlants() {
+                fetch('/plants').then(res => res.json()).then(data => this.plants = data);
+            },
+            searchPlants() {
+                const params = new URLSearchParams({ query: this.searchQuery });
+                console.log('/search_plants?' + params.toString());
+                fetch('/search_plants?' + params.toString())
+                    .then(res => res.json())
+                    .then(data => this.plants = data);
             },
             addUser() {
                 fetch('/add_user', {
@@ -26,7 +74,6 @@
                         localizacao: this.newLocalizacao
                     })
                 }).then(() => {
-                    // Clear the input fields
                     this.newName = '';
                     this.newEmail = '';
                     this.newCelular = '';
@@ -38,47 +85,127 @@
                 fetch('/remove_user', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ remove_id: this.removeId })
+                    body: JSON.stringify({ remove_id: this.removeUserId })
                 }).then(() => {
-                    this.removeId = '';
+                    this.removeUserId = '';
                     this.fetchUsers();
+                    this.fetchPlants(); 
+                });
+            },
+            addPlant() {
+                fetch('/add_plant', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        nome_popular: this.newNomePopular,
+                        nome_especie: this.newNomeEspecie,
+                        familia: this.newFamilia,
+                        genero: this.newGenero,
+                        tamanho: this.newTamanho,
+                        localizacao: this.newLocalizacaoPlant,
+                        status_troca: this.newStatusTroca,
+                        usuario_id: this.newUsuarioId,
+                        foto_url: this.newFotoUrl
+                    })
+                }).then(() => {
+                    this.newNomePopular = '';
+                    this.newNomeEspecie = '';
+                    this.newFamilia = '';
+                    this.newGenero = '';
+                    this.newTamanho = '';
+                    this.newLocalizacaoPlant = '';
+                    this.newStatusTroca = '';
+                    this.newUsuarioId = '';
+                    this.newFotoUrl = '';
+                    this.fetchPlants();
+                });
+            },
+            removePlant() {
+                fetch('/remove_plant', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ remove_id: this.removePlantId })
+                }).then(() => {
+                    this.removePlantId = '';
+                    this.fetchPlants();
                 });
             }
-        }" x-init="fetchUsers">
+        }" x-init="fetchUsers(); fetchPlants();">
 
-        <h2>Add New User</h2>
-        
-        <label for="name">Name:</label>
-        <input type="text" x-model="newName" placeholder="Enter name" required>
-        <br><br>
+        <div class="main-content" x-data="{...}">
+            <!-- User Management -->
+            <h2>Add New User</h2>
+            <label>Name:</label>
+            <input type="text" x-model="newName" placeholder="Enter name" required><br>
+            <label>Email:</label>
+            <input type="email" x-model="newEmail" placeholder="Enter email" required><br>
+            <label>Celular:</label>
+            <input type="text" x-model="newCelular" placeholder="Enter celular" required><br>
+            <label>Localizacao:</label>
+            <input type="text" x-model="newLocalizacao" placeholder="Enter localizacao" required><br>
+            <button @click="addUser">Add User</button><br><br>
 
-        <label for="email">Email:</label>
-        <input type="email" x-model="newEmail" placeholder="Enter email" required>
-        <br><br>
+            <h2>Remove User</h2>
+            <label>Enter User ID:</label>
+            <input type="number" x-model="removeUserId" placeholder="Enter ID to remove" required>
+            <button @click="removeUser">Remove User</button><br><br>
 
-        <label for="celular">Celular:</label>
-        <input type="text" x-model="newCelular" placeholder="Enter celular" required>
-        <br><br>
+            <h1>Users</h1>
+            <ul>
+                <template x-for="user in users" :key="user.id">
+                    <li x-text="user.id + ' - ' + user.name"></li>
+                </template>
+            </ul>
 
-        <label for="localizacao">Localizacao:</label>
-        <input type="text" x-model="newLocalizacao" placeholder="Enter localizacao" required>
-        <br><br>
+            <hr>
 
-        <button @click="addUser">Add User</button>
-        <br><br>
+            <!-- Plant Management -->
+            <h2>Add New Plant</h2>
+            <label>Nome Popular:</label>
+            <input type="text" x-model="newNomePopular" placeholder="Enter nome popular" required><br>
+            <label>Nome Especie:</label>
+            <input type="text" x-model="newNomeEspecie" placeholder="Enter nome especie"><br>
+            <label>Familia:</label>
+            <input type="text" x-model="newFamilia" placeholder="Enter familia"><br>
+            <label>Genero:</label>
+            <input type="text" x-model="newGenero" placeholder="Enter genero"><br>
+            <label>Tamanho:</label>
+            <input type="text" x-model="newTamanho" placeholder="Enter tamanho" required><br>
+            <label>Localizacao:</label>
+            <input type="text" x-model="newLocalizacaoPlant" placeholder="Enter localizacao" required><br>
+            <label>Status Troca:</label>
+            <input type="text" x-model="newStatusTroca" placeholder="Enter status troca" required><br>
+            <label>Usuario ID:</label>
+            <input type="number" x-model="newUsuarioId" placeholder="Enter user ID" required><br>
+            <label>Foto URL:</label>
+            <input type="text" x-model="newFotoUrl" placeholder="Enter foto URL"><br>
+            <button @click="addPlant">Add Plant</button><br><br>
 
-        <h1>Users</h1>
-        <ul>
-            <template x-for="user in users" :key="user.id">
-                <li x-text="user.id + ' - ' + user.name"></li>
-            </template>
-        </ul>
+            <h2>Remove Plant</h2>
+            <label>Enter Plant ID:</label>
+            <input type="number" x-model="removePlantId" placeholder="Enter ID to remove" required>
+            <button @click="removePlant">Remove Plant</button><br><br>
+        </div>
 
-        <h2>Remove User</h2>
-        
-        <label for="removeId">Enter ID to remove:</label>
-        <input type="number" x-model="removeId" placeholder="Enter ID to remove" required>
-        <button @click="removeUser">Remove User</button>
+        <div class="sidebar" x-data="{...}">
+            <h2>Search Plants</h2>
+            <input type="text" x-model="searchQuery" placeholder="Search plants..." @input="searchPlants"><br><br>
+
+            <h1>Plants</h1>
+            <ul>
+                <template x-for="plant in plants" :key="plant.id">
+                    <li>
+                        <strong>ID:</strong> <span x-text="plant.id"></span><br>
+                        <strong>Nome Popular:</strong> <span x-text="plant.nome_popular"></span><br>
+                        <strong>Nome Especie:</strong> <span x-text="plant.nome_especie"></span><br>
+                        <strong>Familia:</strong> <span x-text="plant.familia"></span><br>
+                        <strong>Genero:</strong> <span x-text="plant.genero"></span><br>
+                        <strong>ID Usuario:</strong> <span x-text="plant.usuario_id"></span><br>
+                        <hr>
+                    </li>
+                </template>
+            </ul>
+        </div>
     </div>
 </body>
 </html>
