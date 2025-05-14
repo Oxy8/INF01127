@@ -27,6 +27,13 @@
             top: 0;
             overflow-y: auto; /* Scroll if content overflows */
         }
+        input:invalid {
+            border-color: red;
+        }
+        input:valid {
+            border-color: green;
+        }
+
     </style>
 </head>
 <body>
@@ -129,21 +136,37 @@
                     this.removePlantId = '';
                     this.fetchPlants();
                 });
+            },
+            validateAndAddUser() {
+                const inputs = document.querySelectorAll('.adduser-input');
+
+                let allValid = true;
+        
+                inputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.reportValidity();
+                        allValid = false;
+                    }
+                });
+        
+                if (allValid) {
+                    this.addUser();  // `this` now refers to the Alpine component
+                }
             }
         }" x-init="fetchUsers(); fetchPlants();">
 
-        <div class="main-content" x-data="{...}">
+        <div class="main-content">
             <!-- User Management -->
             <h2>Add New User</h2>
             <label>Name:</label>
-            <input type="text" x-model="newName" placeholder="Enter name" required><br>
+            <input type="text" class="adduser-input" x-model="newName" placeholder="Enter name" required><br>
             <label>Email:</label>
-            <input type="email" x-model="newEmail" placeholder="Enter email" required><br>
+            <input type="email" class="adduser-input" x-model="newEmail" placeholder="Enter email" required><br>
             <label>Celular:</label>
-            <input type="text" x-model="newCelular" placeholder="Enter celular" required><br>
+            <input type="tel" class="adduser-input" pattern="^(?:\D*\d){11}\D*$" x-model="newCelular" placeholder="Enter celular" required><br>
             <label>Localizacao:</label>
-            <input type="text" x-model="newLocalizacao" placeholder="Enter localizacao" required><br>
-            <button @click="addUser">Add User</button><br><br>
+            <input type="text" class="adduser-input" x-model="newLocalizacao" placeholder="Enter localizacao" required><br>
+            <button @click="validateAndAddUser">Add User</button><br><br>
 
             <h2>Remove User</h2>
             <label>Enter User ID:</label>
@@ -187,7 +210,7 @@
             <button @click="removePlant">Remove Plant</button><br><br>
         </div>
 
-        <div class="sidebar" x-data="{...}">
+        <div class="sidebar">
             <h2>Search Plants</h2>
             <input type="text" x-model="searchQuery" placeholder="Search plants..." @input="searchPlants"><br><br>
 
