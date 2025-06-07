@@ -215,15 +215,15 @@ def home():
 
 
 '''
-# Dropa 1 tabela (para modificar atributos ela)
+# Dropa 1 tabela (para modificar atributos dela)
 with app.app_context():
     db.session.execute(text("DROP TABLE IF EXISTS plants CASCADE"))
     db.session.commit()
+'''
 
-# Cria as tabelas novamente (não vai mexer nas que já)
+# Cria as tabelas novamente (não vai mexer nas que já existem)
 with app.app_context():
     db.create_all()
-'''
 
 
 
