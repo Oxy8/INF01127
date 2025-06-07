@@ -60,6 +60,8 @@
                 export PGDATA=$PWD/pgdata
                 export PGSOCKET=$PWD/pgsocket
                 export PGSOCKET_URI="postgresql:///test_db?sslmode=require&host=$PGSOCKET"
+
+                mkdir -p "$PGSOCKET"
               
                 if [ ! -d "$PGDATA" ]; then
                   echo "Initializing PostgreSQL data directory..."
