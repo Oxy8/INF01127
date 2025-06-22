@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de {{ current_user.name }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        :root {
+            --cor-primaria: #6cbb4c;
+            --cor-primaria-hover: #43882a;
+            --cor-fundo: #f0f2f5;
+            --cor-surface: #ffffff;
+            --cor-borda: #dee2e6;
+            --cor-texto: #212529;
+            --cor-texto-secundaria: #6c757d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            background-image: url('static/images/blurred background.png');
+            background-size: cover; 
+            background-position: center; 
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .main-header {
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+            padding: 0.75rem 1.5rem;
+            background-color: var(--cor-surface);
+            border-bottom: 1px solid var(--cor-borda);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .home-logo-link svg {
+            height: 40px; 
+            width: 40px;
+            fill: var(--cor-primaria);
+        }
+
+        .home-logo-link:hover svg {
+            fill: var(--cor-primaria-hover);
+        }
+
+        .search-bar {
+            flex-grow: 1; 
+            max-width: 1600px;
+        }
+
+        .search-bar input {
+            width: 100%; 
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--cor-borda);
+            border-radius: 20px;
+            font-size: 1rem;
+            background-color: var(--cor-fundo);
+        }
+
+        .header-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-buttons button, .action-buttons a {
+            padding: 0.6rem 1.2rem;
+            margin-left: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary { background-color: var(--cor-primaria); color: white; }
+        .btn-primary:hover { background-color: var(--cor-primaria-hover); }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+
+        .user-menu {
+            position: relative;
+        }
+        .user-menu-button {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .user-menu-dropdown {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background-color: var(--cor-surface);
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 200px;
+            overflow: hidden;
+            z-index: 1001;
+        }
+        .user-menu-dropdown a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--cor-texto);
+        }
+        .user-menu-dropdown a:hover {
+            background-color: var(--cor-fundo);
+        }
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--cor-borda);
+            margin: 0.5rem 0;
+        }
+
+        .profile-content-area {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .profile-sidebar {
+            width: 30%;
+            max-width: 360px;
+            flex-shrink: 0;
+            background-color: var(--cor-surface);
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            padding: 2rem;
+            align-self: flex-start;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: var(--cor-fundo);
+            margin: 0 auto 1.5rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cor-texto-secundaria);
+            font-weight: 500;
+            overflow: hidden;
+            border: 3px solid var(--cor-surface);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .profile-picture img {
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+        }
+        
+        .user-info-group {
+            margin-bottom: 2rem;
+        }
+        
+        .info-field {
+            margin-bottom: 1rem;
+        }
+
+        .info-field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--cor-texto-secundaria);
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-field input {
+            width: 100%;
+            padding: 0.5rem 0.25rem;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            background-color: transparent;
+            font-size: 1rem;
+            font-family: inherit;
+            color: var(--cor-texto);
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .info-field input:focus, .info-field input:hover {
+            outline: none;
+            border-bottom-color: var(--cor-primaria);
+            background-color: #f8f9fa;
+        }
+        
+        .profile-main {
+            width: 70%;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .profile-sidebar {
+
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 200px); 
+        }
+
+        .sidebar-scrollable-content {
+            flex-grow: 1;
+            overflow-y: auto;   /* Mantém o scroll vertical */
+            overflow-x: hidden; /* ADICIONE ISTO: Impede o scroll horizontal */
+            padding-right: 0.5rem;
+        }
+
+        .info-field input {
+            box-sizing: border-box; 
+        }
+
+        .profile-sidebar .btn-primary {
+            flex-shrink: 0;
+            margin-top: 1.5rem;
+        }
+
+
+        .sidebar-scrollable-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar-scrollable-content::-webkit-scrollbar-track {
+            background: var(--cor-fundo);
+            border-radius: 4px;
+        }
+        .sidebar-scrollable-content::-webkit-scrollbar-thumb {
+            background: var(--cor-borda);
+            border-radius: 4px;
+        }
+        .sidebar-scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: var(--cor-texto-secundaria);
+        }
+
+
+        .scroll-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .scroll-section h2 {
+            font-size: 1.5rem;
+            color: var(--cor-texto);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .horizontal-scroll-list {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            -webkit-overflow-scrolling: touch; 
+            scrollbar-width: thin;
+            scrollbar-color: var(--cor-borda) var(--cor-fundo);
+        }
+        .horizontal-scroll-list::-webkit-scrollbar {
+            height: 8px;
+        }
+        .horizontal-scroll-list::-webkit-scrollbar-track {
+            background: var(--cor-fundo);
+            border-radius: 4px;
+        }
+        .horizontal-scroll-list::-webkit-scrollbar-thumb {
+            background: var(--cor-borda);
+            border-radius: 4px;
+        }
+        .horizontal-scroll-list::-webkit-scrollbar-thumb:hover {
+            background: var(--cor-texto-secundaria);
+        }
+
+        .post-card {
+            background-color: var(--cor-surface);
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex: 0 0 280px;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .post-image {
+            width: 100%;
+            height: 180px;
+            background-color: #e9ecef; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cor-texto-secundaria);
+        }
+        .post-content {
+            padding: 1rem;
+        }
+        .post-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .post-user {
+            font-size: 0.9rem;
+            color: var(--cor-texto-secundaria);
+            margin: 0 0 1rem 0;
+        }
+        .post-status {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-disponivel { background-color: #d1e7dd; color: #0f5132; }
+        .status-trocado { background-color: #e2e3e5; color: #41464b; }
+        .status-ofertado { background-color: #fff3cd; color: #664d03; }
+    </style>
+</head>
+<body x-data="{
+    async logout() {
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('Ocorreu um erro ao tentar sair. Tente novamente.');
+            }
+        } catch (error) {
+            alert('Erro de conexão ao tentar sair.');
+        }
+    },
+    
+    personalData: {
+        name: '{{ current_user.name }}',
+        email: '{{ current_user.email or '' }}',
+        celular: '{{ current_user.celular or '' }}'
+    },
+    addressData: {
+        rua: '{{ current_user.localizacao.rua if current_user.localizacao else '' }}',
+        numero: '{{ current_user.localizacao.numero if current_user.localizacao else '' }}',
+        complemento: '{{ current_user.localizacao.complemento if current_user.localizacao else '' }}',
+        bairro: '{{ current_user.localizacao.bairro if current_user.localizacao else '' }}',
+        cidade: '{{ current_user.localizacao.cidade if current_user.localizacao else '' }}',
+        uf: '{{ current_user.localizacao.uf if current_user.localizacao else '' }}',
+        cep: '{{ current_user.localizacao.cep if current_user.localizacao else '' }}',
+        cepStatus: ''
+    },
+    saveStatus: {
+        message: '',
+        type: ''
+    },
+    isSaving: false,
+    
+    async buscarCep() {
+        const cepLimpo = this.addressData.cep.replace(/\D/g, '');
+        if (cepLimpo.length !== 8) {
+            this.addressData.cepStatus = '';
+            return;
+        }
+        
+        this.addressData.cepStatus = 'Buscando CEP...';
+        
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+            const data = await response.json();
+            
+            if (data.erro) {
+                this.addressData.cepStatus = 'CEP não encontrado.';
+            } else {
+                this.addressData.rua = data.logradouro || '';
+                this.addressData.bairro = data.bairro || '';
+                this.addressData.cidade = data.localidade || '';
+                this.addressData.uf = data.uf || '';
+                this.addressData.cepStatus = 'Endereço preenchido!';
+            }
+        } catch (error) {
+            this.addressData.cepStatus = 'Erro ao buscar CEP.';
+        }
+    },
+    
+    async saveProfile() {
+        this.isSaving = true;
+        this.saveStatus = { message: '', type: '' };
+        
+        try {
+            const response = await fetch('/api/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    personal: this.personalData,
+                    address: this.addressData
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                this.saveStatus = {
+                    message: 'Perfil atualizado com sucesso!',
+                    type: 'success'
+                };
+            } else {
+                this.saveStatus = {
+                    message: result.message || 'Erro ao atualizar perfil',
+                    type: 'error'
+                };
+            }
+        } catch (error) {
+            this.saveStatus = {
+                message: 'Erro de conexão. Tente novamente.',
+                type: 'error'
+            };
+        } finally {
+            this.isSaving = false;
+        }
+    }
+}">
+    <div class="page-wrapper">
+        <header class="main-header">
+            <a href="/feed" class="home-logo-link" title="Ir para o Feed">
+                <svg id="svg" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="400" viewBox="0, 0, 400,400"><g id="svgg"><path id="path0" d="M273.155 95.820 C 267.651 105.229,253.122 114.557,224.609 126.987 C 220.196 128.911,208.008 134.116,203.418 136.038 C 171.232 149.511,153.413 159.956,140.121 173.145 C 113.199 199.856,107.164 241.923,124.613 281.250 C 125.066 282.271,125.607 283.499,125.816 283.980 L 126.196 284.855 126.936 283.199 C 135.616 263.780,150.446 243.356,169.553 224.508 C 175.082 219.053,176.498 217.752,185.352 209.983 C 188.349 207.353,194.388 202.379,201.855 196.390 C 227.174 176.084,237.253 167.184,244.327 158.887 C 247.580 155.072,247.533 155.332,244.169 159.766 C 237.758 168.215,228.272 178.360,212.207 193.948 C 192.905 212.677,182.989 223.056,172.649 235.352 C 153.432 258.205,138.250 286.221,132.924 308.658 C 132.301 311.283,132.292 311.618,132.867 310.840 C 134.013 309.288,138.236 304.373,139.961 302.582 L 141.895 300.575 144.238 300.805 C 149.679 301.340,162.874 301.075,170.410 300.280 C 208.213 296.289,241.110 276.917,261.264 246.777 C 285.930 209.889,291.747 156.540,276.852 103.811 C 275.849 100.260,274.063 94.531,273.959 94.531 C 273.932 94.531,273.570 95.111,273.155 95.820 " stroke="none" fill-rule="evenodd"></path></g></svg>
+            </a>
+            <div class="search-bar">
+                <input type="search" placeholder="Buscar por plantas, itens ou usuários...">
+            </div>
+            <div class="header-right-actions">
+                <div class="action-buttons">
+                    <a href="/criar-post" class="btn-primary">Criar Post</a>
+                    <a href="/minhas-trocas" class="btn-secondary">Minhas Trocas</a>
+                </div>
+                <div class="user-menu" x-data="{ open: false }">
+                    <button @click="open = !open" class="user-menu-button">
+                        <span>{{ current_user.name }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" style="margin-left: 8px;"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <div x-show="open" @click.outside="open = false" x-transition class="user-menu-dropdown" style="display: none;">
+                        <a href="{{ url_for('profile_page') }}">Meu Perfil</a>
+                        <a href="/configuracoes">Configurações</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" @click.prevent="logout()">Sair</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="profile-content-area">
+            <aside class="profile-sidebar">
+                <div class="sidebar-scrollable-content">
+                    <div class="profile-picture">
+                        {% if current_user.foto_url %}
+                            <img src="{{ current_user.foto_url }}" alt="Foto de {{ current_user.name }}">
+                        {% else %}
+                            <span>Sem Foto</span>
+                        {% endif %}
+                    </div>
+                
+                    <div class="user-info-group">
+                        <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--cor-primaria);">Dados Pessoais</h4>
+                        <div class="info-field">
+                            <label for="user-name">Nome</label>
+                            <input type="text" id="user-name" name="name" value="{{ current_user.name }}">
+                        </div>
+                        <div class="info-field">
+                            <label for="user-email">Email</label>
+                            <input type="email" id="user-email" name="email" value="{{ current_user.email or '' }}">
+                        </div>
+                        <div class="info-field">
+                            <label for="user-celular">Celular</label>
+                            <input type="tel" id="user-celular" name="celular" value="{{ current_user.celular or '' }}">
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid var(--cor-borda); margin: 2rem 0;">
+                
+                <h4 style="margin-bottom: 1rem; color: var(--cor-primaria);">Endereço</h4>
+                
+                <div class="info-field">
+                    <label for="user-cep">CEP</label>
+                    <input type="text" id="user-cep" name="cep" 
+                           x-model="addressData.cep" 
+                           @blur="buscarCep">
+                    <p class="cep-status" 
+                       x-show="addressData.cepStatus" 
+                       x-text="addressData.cepStatus"></p>
+                </div>
+                
+                <div class="info-field">
+                    <label for="user-rua">Rua</label>
+                    <input type="text" id="user-rua" name="rua" 
+                           x-model="addressData.rua">
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <div class="info-field" style="width: 30%;">
+                        <label for="user-numero">Número</label>
+                        <input type="text" id="user-numero" name="numero" 
+                               x-model="addressData.numero">
+                    </div>
+                    <div class="info-field" style="flex-grow: 1;">
+                        <label for="user-complemento">Complemento</label>
+                        <input type="text" id="user-complemento" name="complemento" 
+                               x-model="addressData.complemento">
+                    </div>
+                </div>
+                
+                <div class="info-field">
+                    <label for="user-bairro">Bairro</label>
+                    <input type="text" id="user-bairro" name="bairro" 
+                           x-model="addressData.bairro">
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <div class="info-field" style="flex-grow: 1;">
+                        <label for="user-cidade">Cidade</label>
+                        <input type="text" id="user-cidade" name="cidade" 
+                               x-model="addressData.cidade">
+                    </div>
+                    <div class="info-field" style="width: 25%;">
+                        <label for="user-uf">UF</label>
+                        <input type="text" id="user-uf" name="uf" maxlength="2" 
+                               x-model="addressData.uf">
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary" 
+                    style="width: 100%;"
+                    @click="saveProfile"
+                    :class="{ 'loading': isSaving }"
+                    :disabled="isSaving">
+                <span x-show="!isSaving">Salvar Alterações</span>
+            </button>
+            
+            <p class="save-status" 
+               :class="saveStatus.type" 
+               x-show="saveStatus.message"
+               x-text="saveStatus.message"></p>
+        </aside>
+
+            <div class="profile-main" x-data="{ userPosts: {{ posts|tojson }}, userOffers: {{ offers|tojson }} }">
+                <section class="scroll-section">
+                    <h2>Meus Posts</h2>
+                    <div class="horizontal-scroll-list">
+                        <template x-for="post in userPosts" :key="post.id">
+                            <article class="post-card">
+                                <div class="post-image"><span>Imagem da Planta</span></div>
+                                <div class="post-content">
+                                    <h2 class="post-title" x-text="post.title"></h2>
+                                    <p class="post-user" x-text="post.details"></p>
+                                    <span class="post-status" :class="post.statusClass" x-text="post.statusText"></span>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+                </section>
+
+                <section class="scroll-section">
+                    <h2>Minhas Ofertas</h2>
+                    <div class="horizontal-scroll-list">
+                        <template x-for="offer in userOffers" :key="offer.id">
+                            <article class="post-card">
+                                <div class="post-image">
+                                    <span>Imagem do Post Alvo</span>
+                                </div>
+                                <div class="post-content">
+                                    <h2 class="post-title" x-text="offer.target_post_name"></h2>
+                                    
+                                    <p class="post-user">
+                                        Post de: <span x-text="offer.target_post_owner"></span>
+                                    </p>
+                                    <p class="post-user" style="margin-bottom: 1rem;">
+                                        Você ofereceu: <strong x-text="offer.my_post_offered_name"></strong>
+                                    </p>
+
+                                    <span class="post-status" :class="offer.statusClass" x-text="offer.statusText"></span>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criar Conta</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button-primary {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .button-primary:hover {
+            background-color: #0056b3;
+        }
+        .button-primary:disabled {
+            background-color: #a0cffc;
+            cursor: not-allowed;
+        }
+        .button-secondary {
+            display: inline-block;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 4px;
+            background-color: #6c757d;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+        .button-secondary:hover {
+            background-color: #5a6268;
+        }
+        .login-section {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        input:invalid {
+            border-color: red;
+        }
+        input:valid {
+            border-color: green;
+        }
+        .cep-status, .error-message {
+            font-size: 0.8rem;
+            margin-top: -0.8rem;
+            margin-bottom: 1rem;
+            height: 1rem;
+        }
+        .cep-status {
+            color: #5a6268;
+        }
+        .error-message {
+            color: #dc3545; /* Vermelho */
+        }
+    </style>
+</head>
+<body>
+    <div class="container" x-data="{
+            // Dados do usuário
+            newName: '',
+            newEmail: '',
+            newCelular: '',
+            password: '',
+            passwordConfirmation: '',
+            // Campos de endereço
+            cep: '',
+            uf: '',
+            cidade: '',
+            bairro: '',
+            rua: '',
+            numero: '',
+            complemento: '',
+            cepStatus: '',
+            passwordError: '',
+
+            async buscarCep() {
+                const cepLimpo = this.cep.replace(/\D/g, ''); // Remove caracteres não numéricos
+                if (cepLimpo.length !== 8) {
+                    this.cepStatus = '';
+                    return;
+                }
+                this.cepStatus = 'Buscando CEP...';
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+                    const data = await response.json();
+                    if (data.erro) {
+                        this.cepStatus = 'CEP não encontrado.';
+                    } else {
+                        this.rua = data.logradouro;
+                        this.bairro = data.bairro;
+                        this.cidade = data.localidade;
+                        this.uf = data.uf;
+                        this.cepStatus = 'Endereço preenchido!';
+                        document.getElementById('numero').focus();
+                    }
+                } catch (error) {   
+                    this.cepStatus = 'Erro ao buscar CEP.';
+                }
+            },
+            
+            async addUser() {
+                // Limpa erros anteriores
+                this.passwordError = '';
+        
+                const enderecoCompleto = { cep: this.cep, uf: this.uf, cidade: this.cidade, bairro: this.bairro, rua: this.rua, numero: this.numero, complemento: this.complemento, };
+        
+                try {
+                    const response = await fetch('/api/add_user', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            name: this.newName,
+                            email: this.newEmail,
+                            celular: this.newCelular,
+                            password: this.password,
+                            endereco: enderecoCompleto 
+                        })
+                    });
+        
+                    if (response.ok) {
+                        alert('Conta criada com sucesso! Você será redirecionado para a página de login.');
+                        window.location.href = '/login';
+                    } else {
+                        // Se o servidor retornou um erro (ex: 409 Conflict - email já existe)
+                        // Pega a mensagem de erro do JSON retornado pelo backend
+                        const errorData = await response.json();
+                        this.passwordError = errorData.message || 'Ocorreu um erro ao criar a conta.';
+                    }
+        
+                } catch (error) {
+                    // Lida com erros de coonexão
+                    this.passwordError = 'Não foi possível conectar ao servidor. Tente novamente.';
+                }
+            },
+            validateAndAddUser() {
+                // Limpa o erro de senha anterior
+                this.passwordError = '';
+
+                // 1. Validação de senha
+                if (this.password !== this.passwordConfirmation) {
+                    this.passwordError = 'As senhas não conferem.';
+                    return; // Interrompe a submissão
+                }
+
+                // 2. Validação dos outros campos
+                const inputs = document.querySelectorAll('.adduser-input');
+                let allValid = true;
+        
+                inputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.reportValidity();
+                        allValid = false;
+                    }
+                });
+        
+                if (allValid) {
+                    this.addUser();
+                }
+            }
+        }">
+
+        <div>
+            <h2>Criar Nova Conta</h2>
+            
+            <label for="name">Nome:</label>
+            <input id="name" type="text" class="adduser-input" x-model="newName" placeholder="Digite seu nome completo" required>
+            
+            <label for="email">Email:</label>
+            <input id="email" type="email" class="adduser-input" x-model="newEmail" placeholder="Digite seu melhor email" required>
+            
+            <label for="celular">Celular:</label>
+            <input id="celular" type="tel" class="adduser-input" pattern="^\D*(\d\D*){11}$" x-model="newCelular" placeholder="Ex: (51) 99999-9999" required>
+            
+            <label for="password">Senha:</label>
+            <input id="password" type="password" class="adduser-input" x-model="password" placeholder="Mínimo de 8 caracteres" required minlength="8">
+
+            <label for="password_confirmation">Confirmar Senha:</label>
+            <input id="password_confirmation" type="password" class="adduser-input" x-model="passwordConfirmation" placeholder="Digite a senha novamente" required>
+            <p class="error-message" 
+               x-show="password && passwordConfirmation && password !== passwordConfirmation">
+               As senhas não conferem.
+            </p>
+
+            <label for="cep">CEP:</label>
+            <input id="cep" type="text" class="adduser-input" x-model="cep" @blur="buscarCep" placeholder="Digite o CEP e saia do campo" required maxlength="9">
+            <p class="cep-status" x-show="cepStatus" x-text="cepStatus"></p>
+
+            <label for="uf">UF (Estado):</label>
+            <input id="uf" type="text" class="adduser-input" x-model="uf" placeholder="Ex: RS" required>
+
+            <label for="cidade">Cidade:</label>
+            <input id="cidade" type="text" class="adduser-input" x-model="cidade" placeholder="Ex: Porto Alegre" required>
+
+            <label for="bairro">Bairro:</label>
+            <input id="bairro" type="text" class="adduser-input" x-model="bairro" placeholder="Digite seu bairro" required>
+
+            <label for="rua">Rua/Logradouro:</label>
+            <input id="rua" type="text" class="adduser-input" x-model="rua" placeholder="Digite sua rua" required>
+
+            <label for="numero">Número:</label>
+            <input id="numero" type="text" class="adduser-input" x-model="numero" placeholder="Digite o número" required>
+
+            <label for="complemento">Complemento:</label>
+            <input id="complemento" type="text" class="adduser-input" x-model="complemento" placeholder="Ex: Apto 301, Bloco B (Opcional)">
+            
+            <button class="button-primary" 
+                    @click="validateAndAddUser"
+                    :disabled="!password || password.length < 8 || password !== passwordConfirmation">
+                Criar Conta
+            </button>
+            
+            <div class="login-section">
+                <p>Já possuo uma conta:</p>
+                <a href="/login" class="button-secondary">Fazer Login</a>
+            </div>
+            </div>
+
+    </div>
+</body>
+</html>

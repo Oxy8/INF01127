@@ -58,7 +58,7 @@
             removePlantId: '',
             
             fetchUsers() {
-                fetch('/users').then(res => res.json()).then(data => this.users = data);
+                fetch('/api/users').then(res => res.json()).then(data => this.users = data);
             },
             fetchPlants() {
                 fetch('/plants').then(res => res.json()).then(data => this.plants = data);

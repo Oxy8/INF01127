@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazer Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        /* Estilos copiados da página de cadastro para manter a consistência */
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4; 
+            background-image: url('static/images/plantas_gepeto.png');
+            background-size: cover; 
+            background-position: center; 
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button-primary {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .button-primary:hover {
+            background-color: #0056b3;
+        }
+        .button-secondary {
+            display: inline-block;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 4px;
+            background-color: #6c757d;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+        .button-secondary:hover {
+            background-color: #5a6268;
+        }
+        .register-section {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        /* Estilo para a mensagem de erro */
+        .error-message {
+            color: #dc3545; /* Vermelho */
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" x-data="{
+            email: '',
+            password: '',
+            errorMessage: '',
+
+            async loginUser() {
+                this.errorMessage = '';
+            
+                try {
+                    const response = await fetch('/perform_login', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            email: this.email,
+                            password: this.password
+                        })
+                    });
+            
+                    const data = await response.json(); // Pega a resposta JSON em ambos os casos
+            
+                    if (response.ok) {
+                        // Se o login foi bem-sucedido, usa a URL enviada pelo backend
+                        window.location.href = data.redirect_url || '/feed'; 
+                    } else {
+                        // Se falhou, exibe a mensagem de erro do backend
+                        this.errorMessage = data.message || 'Email ou senha inválidos.';
+                    }
+                } catch (error) {
+                    this.errorMessage = 'Ocorreu um erro de conexão. Tente novamente.';
+                }
+            }
+        }">
+
+        <div>
+            <h2>Fazer Login</h2>
+
+            <template x-if="errorMessage">
+                <div class="error-message" x-text="errorMessage"></div>
+            </template>
+            
+            <label for="email">Email:</label>
+            <input id="email" type="email" x-model="email" placeholder="Digite seu email" required>
+            
+            <label for="password">Senha:</label>
+            <input id="password" type="password" x-model="password" placeholder="Digite sua senha" required>
+            
+            <button class="button-primary" @click="loginUser">Entrar</button>
+            
+            <div class="register-section">
+                <p>Ainda não tem uma conta?</p>
+                <a href="/register" class="button-secondary">Criar Nova Conta</a>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

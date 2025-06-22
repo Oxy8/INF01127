@@ -3,13 +3,9 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-  	nixpak = {
-      url = "github:nixpak/nixpak";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, nixpak, ... }: 
+  outputs = { self, nixpkgs, ... }: 
 
 
 
@@ -31,14 +27,15 @@
     
         vscode-with-extensions =
           pkgs.vscode-with-extensions.override { vscodeExtensions = extensions; };
+
+        postgresqlWithExtensions = pkgs.postgresql_17.withPackages (p: [
+            p.postgis
+            p.pg_repack
+          ]);
         
       in
 
       {
-        mkNixPak = nixpak.lib.nixpak {
-	  	  inherit (pkgs) lib;
-	  	  inherit pkgs;
-		};
 		  
         devShell.x86_64-linux = pkgs.mkShell {
           packages = [
@@ -49,8 +46,13 @@
 			pkgs.python312Packages.psycopg2
 			pkgs.python312Packages.sqlalchemy
 			pkgs.python312Packages.flask-sqlalchemy
-			pkgs.postgresql_17
-			pkgs.postgresql_17.dev
+			pkgs.python312Packages.flask-login
+			pkgs.python312Packages.werkzeug
+			pkgs.python312Packages.googlemaps
+			pkgs.python312Packages.geoalchemy2
+			# pkgs.postgresql_17
+			# pkgs.postgresql_17.dev
+			postgresqlWithExtensions
           ];
 
         shellHook = ''
