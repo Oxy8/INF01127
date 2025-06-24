@@ -340,6 +340,45 @@
         .status-disponivel { background-color: #d1e7dd; color: #0f5132; }
         .status-trocado { background-color: #e2e3e5; color: #41464b; }
         .status-ofertado { background-color: #fff3cd; color: #664d03; }
+
+        .post-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Faz o conteúdo crescer para preencher o card */
+        }
+
+        .card-actions {
+            margin-top: auto; /* Empurra os botões para a base do card */
+            padding-top: 1rem; /* Espaço acima dos botões */
+            border-top: 1px solid var(--cor-borda);
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end; /* Alinha os botões à direita */
+        }
+
+        .btn-card-action {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--cor-borda);
+            background-color: var(--cor-surface);
+            color: var(--cor-texto-secundaria);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-card-action.danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-card-action.success:hover {
+            background-color: var(--cor-primaria);
+            border-color: var(--cor-primaria);
+            color: white;
+        }
     </style>
 </head>
 <body x-data="{
@@ -460,7 +499,6 @@
             <div class="header-right-actions">
                 <div class="action-buttons">
                     <a href="/criar-post" class="btn-primary">Criar Post</a>
-                    <a href="/minhas-trocas" class="btn-secondary">Minhas Trocas</a>
                 </div>
                 <div class="user-menu" x-data="{ open: false }">
                     <button @click="open = !open" class="user-menu-button">
@@ -469,13 +507,13 @@
                     </button>
                     <div x-show="open" @click.outside="open = false" x-transition class="user-menu-dropdown" style="display: none;">
                         <a href="{{ url_for('profile_page') }}">Meu Perfil</a>
-                        <a href="/configuracoes">Configurações</a>
                         <div class="dropdown-divider"></div>
                         <a href="#" @click.prevent="logout()">Sair</a>
                     </div>
                 </div>
             </div>
         </header>
+
         <main class="profile-content-area">
             <aside class="profile-sidebar">
                 <div class="sidebar-scrollable-content">
@@ -566,44 +604,114 @@
                :class="saveStatus.type" 
                x-show="saveStatus.message"
                x-text="saveStatus.message"></p>
-        </aside>
+            </aside>
 
-            <div class="profile-main" x-data="{ userPosts: {{ posts|tojson }}, userOffers: {{ offers|tojson }} }">
+            {% set page_data = {
+                "userPosts": posts,
+                "userOffers": offers
+            } %}
+            
+            <div class="profile-main" x-data='{
+                ...{{ page_data | tojson | safe }},
+            
+                async deletePost(postId) {
+                    if (!confirm("Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita.")) {
+                        return;
+                    }
+                    
+                    try {
+                        // Supondo uma rota de API /api/delete_post
+                        const response = await fetch("/api/delete_post", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({ post_id: postId })
+                        });
+            
+                        if (response.ok) {
+                            // Remove o post da lista no frontend para uma atualização instantânea
+                            this.userPosts = this.userPosts.filter(p => p.id !== postId);
+                        } else {
+                            alert("Erro ao excluir o post.");
+                        }
+                    } catch (error) {
+                        alert("Erro de conexão.");
+                    }
+                },
+            
+                async cancelOffer(offerId) {
+                    if (!confirm("Tem certeza que deseja cancelar esta oferta?")) {
+                        return;
+                    }
+            
+                    try {
+                        // Supondo uma rota de API /api/cancel_offer
+                        const response = await fetch("/api/cancel_offer", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({ offer_id: offerId })
+                        });
+            
+                        if (response.ok) {
+                            this.userOffers = this.userOffers.filter(o => o.id !== offerId);
+                        } else {
+                            alert("Erro ao cancelar a oferta.");
+                        }
+                    } catch (error) {
+                        alert("Erro de conexão.");
+                    }
+                }
+            }'>
                 <section class="scroll-section">
                     <h2>Meus Posts</h2>
                     <div class="horizontal-scroll-list">
                         <template x-for="post in userPosts" :key="post.id">
                             <article class="post-card">
-                                <div class="post-image"><span>Imagem da Planta</span></div>
+                                <div class="post-image">
+                                    <template x-if="post.photo_url">
+                                        <img :src="post.photo_url" :alt="post.title" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </template>
+                                    <template x-if="!post.photo_url">
+                                        <span>Sem imagem</span>
+                                    </template>
+                                </div>
                                 <div class="post-content">
                                     <h2 class="post-title" x-text="post.title"></h2>
+                                    <p class="post-description" x-show="post.description" x-text="post.description"></p>
                                     <p class="post-user" x-text="post.details"></p>
                                     <span class="post-status" :class="post.statusClass" x-text="post.statusText"></span>
+                                    <div class="card-actions">
+                                        <template x-if="post.statusText === 'Disponível'">
+                                            <button @click="deletePost(post.id)" class="btn-card-action danger">Excluir</button>
+                                        </template>
+                                    </div>
                                 </div>
                             </article>
                         </template>
                     </div>
                 </section>
-
                 <section class="scroll-section">
-                    <h2>Minhas Ofertas</h2>
+                    <h2>Minhas Trocas</h2>
                     <div class="horizontal-scroll-list">
                         <template x-for="offer in userOffers" :key="offer.id">
                             <article class="post-card">
                                 <div class="post-image">
-                                    <span>Imagem do Post Alvo</span>
+                                    <template x-if="offer.photo_url">
+                                        <img :src="offer.photo_url" :alt="offer.title" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </template>
+                                    <template x-if="!offer.photo_url">
+                                        <span>Sem imagem</span>
+                                    </template>
                                 </div>
                                 <div class="post-content">
-                                    <h2 class="post-title" x-text="offer.target_post_name"></h2>
-                                    
-                                    <p class="post-user">
-                                        Post de: <span x-text="offer.target_post_owner"></span>
-                                    </p>
-                                    <p class="post-user" style="margin-bottom: 1rem;">
-                                        Você ofereceu: <strong x-text="offer.my_post_offered_name"></strong>
-                                    </p>
-
+                                    <h2 class="post-title" x-text="offer.title"></h2>
+                                    <p class="post-description" x-show="offer.description" x-text="offer.description"></p>
+                                    <p class="post-user" x-text="offer.details"></p>
                                     <span class="post-status" :class="offer.statusClass" x-text="offer.statusText"></span>
+                                    <div class="card-actions">
+                                        <template x-if="offer.statusText === 'Em negociação'">
+                                            <button @click="cancelOffer(offer.id)" class="btn-card-action danger">Cancelar Oferta</button>
+                                        </template>
+                                    </div>
                                 </div>
                             </article>
                         </template>
@@ -613,5 +721,9 @@
         </main>
     </div>
 </body>
+
+
+
+
 </html>
 

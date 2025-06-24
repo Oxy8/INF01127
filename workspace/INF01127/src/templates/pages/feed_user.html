@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Feed</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
             --cor-primaria: #6cbb4c;
@@ -222,9 +223,67 @@
             background-color: #d1e7dd;
             color: #0f5132;
         }
+
+        .feed-grid {
+            display: grid;
+            /* Cria colunas de no mínimo 280px e no máximo 1 fração do espaço */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px; /* Espaçamento entre os cards */
+            padding: 20px;
+        }
+
+        .post-card {
+            /* Estilos do seu post-card */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-image {
+            height: 200px;
+            background-color: #f0f0f0;
+        }
+
+        .post-content {
+            padding: 15px;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .modal-content .post-card.selected {
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 0 3px rgba(108, 187, 76, 0.5);
+            transform: translateY(0); /* Anula o efeito hover para o selecionado */
+        }
     </style>
 </head>
-<body>
+<body x-data="{
+    async logout() {
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('Ocorreu um erro ao tentar sair. Tente novamente.');
+            }
+        } catch (error) {
+            alert('Erro de conexão ao tentar sair.');
+        }
+    }
+}">
     <div class="page-container">
         <header class="main-header">
             <a href="/feed" class="home-logo-link" title="Ir para o Feed">
@@ -248,9 +307,8 @@
                     </button>
                     <div x-show="open" @click.outside="open = false" x-transition class="user-menu-dropdown" style="display: none;">
                         <a href="/perfil">Meu Perfil</a>
-                        <a href="/configuracoes">Configurações</a>
                         <div class="dropdown-divider"></div>
-                        <a href="/logout">Sair</a>
+                        <a href="#" @click.prevent="logout()">Sair</a>
                     </div>
                 </div>
             </div>
@@ -278,33 +336,147 @@
             </div>
         </aside>
 
-        <main class="main-content">
+        {% set feed_initial_data = {
+            "posts": page_data.initial_posts,
+            "hasMore": page_data.has_next_page,
+            "userPosts": page_data.user_posts_for_offer
+        } %}
+        <main class="main-content" 
+            x-data='{
+                ...{{ feed_initial_data | tojson | safe }},
+        
+                page: 1,
+                isLoading: false,
+        
+                loadMore() {
+                    if (this.isLoading || !this.hasMore) { return; }
+                    this.isLoading = true;
+                    this.page++;
+                    fetch(`/api/load-posts?page=${this.page}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.posts = [...this.posts, ...data.posts];
+                            this.hasMore = data.has_next;
+                            this.isLoading = false;
+                        });
+                },
+
+                isModalOpen: false,
+                modalTargetPost: null,
+                selectedOfferPostId: "",
+
+                openOfferModal(post) {
+                    this.modalTargetPost = post;
+                    this.isModalOpen = true;
+                    this.selectedOfferPostId = ""; // Reseta a seleção anterior
+                },
+
+                submitOffer() {
+                    if (!this.selectedOfferPostId) {
+                        alert("Por favor, selecione um item para oferecer em troca.");
+                        return;
+                    }
+                    const targetId = this.modalTargetPost.id.startsWith("p") ? this.modalTargetPost.id.substring(1) : this.modalTargetPost.id;
+                    
+                    fetch("/api/create-offer", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            target_post_id: parseInt(targetId),
+                            offered_post_id: parseInt(this.selectedOfferPostId)
+                        })
+                    })
+                    .then(response => response.json().then(data => ({ok: response.ok, data})))
+                    .then(({ok, data}) => {
+                        alert(data.message || data.error);
+                        if (ok) {
+                            this.isModalOpen = false;
+                            // A forma mais simples de atualizar o feed é recarregar a página
+                            window.location.reload();
+                        }
+                    });
+                }
+            }'>
+        
             <section class="feed-grid">
-                <article class="post-card">
-                    <div class="post-image"><span>Imagem da Planta</span></div>
-                    <div class="post-content">
-                        <h2 class="post-title">Muda de Jiboia</h2>
-                        <p class="post-user">Por: Joana B. - Porto Alegre, RS</p>
-                        <span class="post-status">Disponível</span>
+                <template x-for="post in posts" :key="post.id">
+                    <article class="post-card">
+                        <div class="post-image">
+                            <template x-if="post.photo_url">
+                                <img :src="post.photo_url" :alt="post.title" style="width: 100%; height: 100%; object-fit: cover;">
+                            </template>
+                            <template x-if="!post.photo_url">
+                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background-color: #eee; color: #888;">
+                                    <span>Sem imagem</span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="post-content">
+                            <h2 class="post-title" x-text="post.title"></h2>
+                            <p class="post-user" x-text="post.user_details"></p>
+                            <span class="post-status" :class="post.statusClass" x-text="post.statusText"></span>
+                        </div>
+                        <div class="post-actions" style="padding: 0 1rem 1rem 1rem;">
+                            <button @click="openOfferModal(post)" class="btn-primary" style="width: 100%;">Fazer Oferta</button>
+                        </div>
+                    </article>
+                </template>
+            </section>
+        
+            <div x-show="hasMore" x-intersect.full="loadMore()"></div>
+            <div class="loading-indicator" x-show="isLoading" x-transition>
+                <p>Carregando mais posts...</p>
+            </div>
+
+
+            <div x-show="isModalOpen" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1rem;" x-cloak x-transition>
+                <div @click.outside="isModalOpen = false" class="modal-content" style="background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+                    <template x-if="modalTargetPost">
+                        <div style="flex-shrink: 0;">
+                            <h2 style="margin-top: 0; font-size: 1.5rem;">Fazer Oferta de Troca</h2>
+                            <p>Você está ofertando uma troca por: <strong x-text="modalTargetPost.title"></strong></p>
+                            <hr style="border: none; border-top: 1px solid var(--cor-borda); margin: 1rem 0;">
+                            <label style="display: block; margin-bottom: 1rem; font-weight: 600;">Selecione um de seus itens disponíveis para a troca:</label>
+                        </div>
+                    </template>
+                    
+                    <div class="horizontal-scroll-list" style="flex-grow: 1; overflow-y: auto;">
+                        <template x-for="userPost in userPosts" :key="userPost.id">
+                            <article 
+                                @click="selectedOfferPostId = userPost.id"
+                                class="post-card" 
+                                :class="{ 'selected': selectedOfferPostId === userPost.id }"
+                                style="cursor: pointer; min-width: 220px;"
+                                x-init="console.log('Dados do userPost:', JSON.parse(JSON.stringify(userPost)))"
+                                >
+                                
+                                <div class="post-image">
+                                    <template x-if="userPost.photo_url">
+                                        <img x-bind:src="userPost.photo_url" x-bind:alt="userPost.title" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </template>
+                                    <template x-if="!userPost.photo_url">
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                            <span>Sem imagem</span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="post-content">
+                                    <h2 class="post-title" x-text="userPost.title"></h2>
+                                </div>
+                            </article>
+                        </template>
+                         <p x-show="userPosts.length === 0" style="color: var(--cor-texto-secundaria); font-style: italic; margin-top: 0.5rem;">
+                            Você não possui nenhum item disponível para troca no momento.
+                        </p>
                     </div>
-                </article>
-                <article class="post-card">
-                    <div class="post-image"><span>Imagem da Planta</span></div>
-                    <div class="post-content">
-                        <h2 class="post-title">Costela de Adão</h2>
-                        <p class="post-user">Por: Carlos M. - Canoas, RS</p>
-                        <span class="post-status">Disponível</span>
+
+                    <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; flex-shrink: 0;">
+                        <button @click="isModalOpen = false" class="btn-secondary">Cancelar</button>
+                        <button @click="submitOffer()" class="btn-primary" :disabled="!selectedOfferPostId || userPosts.length === 0">Confirmar Oferta</button>
                     </div>
-                </article>
-                <article class="post-card">
-                    <div class="post-image"><span>Imagem da Planta</span></div>
-                    <div class="post-content">
-                        <h2 class="post-title">Cacto Mandacaru</h2>
-                        <p class="post-user">Por: Ana P. - Viamão, RS</p>
-                        <span class="post-status">Disponível</span>
-                    </div>
-                </article>
-                </section>
+                </div>
+            </div>
+        
         </main>
     </div>
 </body>

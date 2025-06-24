@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Novo Post</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        :root {
+            --cor-primaria: #6cbb4c;
+            --cor-primaria-hover: #43882a;
+            --cor-fundo: #f0f2f5;
+            --cor-surface: #ffffff;
+            --cor-borda: #dee2e6;
+            --cor-texto: #212529;
+            --cor-texto-secundaria: #6c757d;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            background-image: url('static/images/blurred background.png');
+            background-size: cover; 
+            background-position: center; 
+        }
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .main-header { display: flex; align-items: center; gap: 1.5rem; padding: 0.75rem 1.5rem; background-color: var(--cor-surface); border-bottom: 1px solid var(--cor-borda); position: sticky; top: 0; z-index: 1000; flex-shrink: 0; }
+        .home-logo-link svg { height: 40px; width: 40px; fill: var(--cor-primaria); }
+        .home-logo-link:hover svg { fill: var(--cor-primaria-hover); }
+        .search-bar { flex-grow: 1; max-width: 1600px; }
+        .search-bar input { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--cor-borda); border-radius: 20px; font-size: 1rem; background-color: var(--cor-fundo); }
+        .header-right-actions { display: flex; align-items: center; gap: 1.5rem; flex-shrink: 0; }
+        .action-buttons { display: flex; gap: 0.75rem; }
+        .action-buttons button, .action-buttons a { padding: 0.6rem 1.2rem; margin-left: 0.75rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
+        .btn-primary {
+            padding: 0.9rem 1.5rem; 
+            
+            font-size: 1.1rem; 
+            
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background-color: var(--cor-primaria);
+            color: white;
+            border: none;
+            border-radius: 8px; 
+            cursor: pointer;
+            
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+
+            transition: all 0.2s ease-in-out; 
+        }
+
+        .btn-primary:hover {
+            background-color: var(--cor-primaria-hover);
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:disabled {
+            background-color: #a8d896;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .user-menu { position: relative; }
+        .user-menu-button { display: flex; align-items: center; background: none; border: none; cursor: pointer; font-size: 1rem; font-weight: 600; }
+        .user-menu-dropdown { position: absolute; top: 120%; right: 0; background-color: var(--cor-surface); border: 1px solid var(--cor-borda); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 200px; overflow: hidden; z-index: 1001; }
+        .user-menu-dropdown a { display: block; padding: 0.75rem 1rem; text-decoration: none; color: var(--cor-texto); }
+        .user-menu-dropdown a:hover { background-color: var(--cor-fundo); }
+        .dropdown-divider { height: 1px; background-color: var(--cor-borda); margin: 0.5rem 0; }
+
+        /* Estilos específicos para a página de criação de post */
+        .form-page-container {
+            padding: 2rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .form-container {
+            background-color: var(--cor-surface);
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 700px;
+            height: fit-content;
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 2rem;
+            color: var(--cor-texto);
+        }
+        .form-field {
+            margin-bottom: 1.5rem;
+        }
+        .form-field label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--cor-texto-secundaria);
+            margin-bottom: 0.5rem;
+        }
+        .form-field input, .form-field select, .form-field textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--cor-borda);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 0 2px rgba(108, 187, 76, 0.2);
+        }
+        .image-upload-area {
+            border: 2px dashed var(--cor-borda);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .image-upload-area:hover {
+            border-color: var(--cor-primaria);
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 1rem;
+            border-radius: 8px;
+        }
+        .form-message {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+        }
+        .form-message.success { background-color: #d1e7dd; color: #0f5132; }
+        .form-message.error { background-color: #f8d7da; color: #842029; }
+    </style>
+</head>
+<body x-data="{
+    async logout() {
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('Ocorreu um erro ao tentar sair. Tente novamente.');
+            }
+        } catch (error) {
+            alert('Erro de conexão ao tentar sair.');
+        }
+    }
+}">
+    <div class="page-wrapper">
+        <header class="main-header">
+            <a href="/feed" class="home-logo-link" title="Ir para o Feed">
+                <svg id="svg" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="400" viewBox="0, 0, 400,400"><g id="svgg"><path id="path0" d="M273.155 95.820 C 267.651 105.229,253.122 114.557,224.609 126.987 C 220.196 128.911,208.008 134.116,203.418 136.038 C 171.232 149.511,153.413 159.956,140.121 173.145 C 113.199 199.856,107.164 241.923,124.613 281.250 C 125.066 282.271,125.607 283.499,125.816 283.980 L 126.196 284.855 126.936 283.199 C 135.616 263.780,150.446 243.356,169.553 224.508 C 175.082 219.053,176.498 217.752,185.352 209.983 C 188.349 207.353,194.388 202.379,201.855 196.390 C 227.174 176.084,237.253 167.184,244.327 158.887 C 247.580 155.072,247.533 155.332,244.169 159.766 C 237.758 168.215,228.272 178.360,212.207 193.948 C 192.905 212.677,182.989 223.056,172.649 235.352 C 153.432 258.205,138.250 286.221,132.924 308.658 C 132.301 311.283,132.292 311.618,132.867 310.840 C 134.013 309.288,138.236 304.373,139.961 302.582 L 141.895 300.575 144.238 300.805 C 149.679 301.340,162.874 301.075,170.410 300.280 C 208.213 296.289,241.110 276.917,261.264 246.777 C 285.930 209.889,291.747 156.540,276.852 103.811 C 275.849 100.260,274.063 94.531,273.959 94.531 C 273.932 94.531,273.570 95.111,273.155 95.820 " stroke="none" fill-rule="evenodd"></path></g></svg>
+            </a>
+            <div class="search-bar">
+                <input type="search" placeholder="Buscar por plantas, itens ou usuários...">
+            </div>
+            <div class="header-right-actions">
+                <div class="action-buttons">
+                    <a href="/minhas-trocas" class="btn-secondary">Minhas Trocas</a>
+                </div>
+                <div class="user-menu" x-data="{ open: false }">
+                    <button @click="open = !open" class="user-menu-button">
+                        <span>{{ current_user.name }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" style="margin-left: 8px;"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <div x-show="open" @click.outside="open = false" x-transition class="user-menu-dropdown" style="display: none;">
+                        <a href="{{ url_for('profile_page') }}">Meu Perfil</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" @click.prevent="logout()">Sair</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="form-page-container" x-data="{
+            formData: {
+                common_name: '',
+                description: '',
+                species_name: '',
+                family: '',
+                genus: '',
+                size: '',
+                photo: null
+            },
+            photoPreview: '',
+            formMessage: '',
+            isError: false,
+            isLoading: false,
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.formData.photo = file;
+                    this.photoPreview = URL.createObjectURL(file);
+                }
+            },
+
+            async submitPost() {
+                this.isLoading = true;
+                this.formMessage = '';
+
+                const data = new FormData();
+                for (const key in this.formData) {
+                    if (this.formData[key]) {
+                        data.append(key, this.formData[key]);
+                    }
+                }
+
+                try {
+                    const response = await fetch('/api/create_post', {
+                        method: 'POST',
+                        body: data
+                        // Não defina o 'Content-Type', o navegador faz isso por você com FormData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.isError = false;
+                        this.formMessage = 'Post criado com sucesso! Redirecionando...';
+                        setTimeout(() => {
+                            window.location.href = '/feed'; // ou para a página do post criado
+                        }, 2000);
+                    } else {
+                        throw new Error(result.message || 'Ocorreu um erro.');
+                    }
+                } catch (error) {
+                    this.isError = true;
+                    this.formMessage = error.message;
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+        }">
+            <div class="form-container">
+                <h2>Criar Novo Post</h2>
+                <form @submit.prevent="submitPost">
+                    <div class="form-field">
+                        <label for="common_name">Nome Popular</label>
+                        <input type="text" id="common_name" x-model="formData.common_name" required>
+                    </div>
+
+                    <div class="form-field">
+                <label for="description">Descrição (opcional)</label>
+                <textarea id="description" x-model="formData.description" rows="4" placeholder="Fale um pouco sobre o item, seu estado, o que você procura em troca, etc."></textarea>
+            </div>
+
+                    <div class="form-field">
+                        <label for="photo">Foto da Planta</label>
+                        <input type="file" id="photo" @change="handleFileUpload($event)" accept="image/*" style="display: none;">
+                        <div class="image-upload-area" @click="document.getElementById('photo').click()">
+                            <template x-if="!photoPreview">
+                                <span>Clique ou arraste para enviar uma foto</span>
+                            </template>
+                            <template x-if="photoPreview">
+                                <img :src="photoPreview" alt="Prévia da imagem" class="image-preview">
+                            </template>
+                        </div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="size">Tamanho</label>
+                        <select id="size" x-model="formData.size" required>
+                            <option value="" disabled selected>Selecione o tamanho</option>
+                            <option value="Pequeno">Pequeno (muda, semente, etc.)</option>
+                            <option value="Médio">Médio (vaso pequeno)</option>
+                            <option value="Grande">Grande (vaso grande, planta adulta)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="species_name">Nome da Espécie (opcional)</label>
+                        <input type="text" id="species_name" x-model="formData.species_name">
+                    </div>
+                    <div class="form-field">
+                        <label for="family">Família (opcional)</label>
+                        <input type="text" id="family" x-model="formData.family">
+                    </div>
+                    <div class="form-field">
+                        <label for="genus">Gênero (opcional)</label>
+                        <input type="text" id="genus" x-model="formData.genus">
+                    </div>
+
+                    <button type="submit" class="btn-primary" :disabled="isLoading" style="width: 100%;">
+                        <span x-show="!isLoading">Publicar Post</span>
+                        <span x-show="isLoading">Publicando...</span>
+                    </button>
+
+                    <div x-show="formMessage" class="form-message" :class="isError ? 'error' : 'success'" x-text="formMessage"></div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

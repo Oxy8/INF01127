@@ -6,7 +6,17 @@
     <title>Fazer Login</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
-        /* Estilos copiados da página de cadastro para manter a consistência */
+       
+        :root {
+            --cor-primaria: #6cbb4c;
+            --cor-primaria-hover: #43882a;
+            --cor-fundo: #f0f2f5;
+            --cor-surface: #ffffff;
+            --cor-borda: #dee2e6;
+            --cor-texto: #212529;
+            --cor-texto-secundaria: #6c757d;
+        }
+        
         body {
             font-family: sans-serif;
             display: flex;
@@ -19,7 +29,7 @@
             background-position: center; 
         }
         .container {
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.8);
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -47,13 +57,13 @@
             padding: 0.75rem;
             border: none;
             border-radius: 4px;
-            background-color: #007bff;
+            background-color: var(--cor-primaria);
             color: white;
             font-size: 1rem;
             cursor: pointer;
         }
         .button-primary:hover {
-            background-color: #0056b3;
+            background-color: var(--cor-primaria-hover);
         }
         .button-secondary {
             display: inline-block;
